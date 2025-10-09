@@ -1,0 +1,30 @@
+     /* Import TW Elements CSS (untuk navbar collapse & ripple) - HARUS DI AWAL */
+     @import 'tw-elements/dist/css/tw-elements.css';
+
+     @tailwind base;
+     @tailwind components;
+     @tailwind utilities;
+
+     /* Custom styles jika ada (misalnya line-clamp fallback) */
+     /* ... isi custom Anda ... */
+            /* Custom line-clamp untuk teks panjang (misalnya deskripsi misa) */
+       .line-clamp-2 {
+         overflow: hidden;
+         display: -webkit-box;  /* Vendor prefix untuk WebKit (Chrome/Safari) */
+         -webkit-line-clamp: 2;
+         -webkit-box-orient: vertical;
+         line-clamp: 2;
+         display: flex;  /* ← Ganti dari 'box' ke 'flex' (standar modern) */
+         flex-wrap: wrap;  /* Tambah untuk kompatibilitas */
+       }
+
+       .line-clamp-3 {
+         overflow: hidden;
+         display: -webkit-box;
+         -webkit-line-clamp: 3;
+         -webkit-box-orient: vertical;
+         line-clamp: 3;
+         display: flex;  /* ← Ganti dari 'box' ke 'flex' */
+         flex-wrap: wrap;
+       }
+       

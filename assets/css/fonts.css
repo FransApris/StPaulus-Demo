@@ -1,0 +1,49 @@
+/* assets/css/fonts.css - Global fonts untuk gereja (Cinzel title, Lora body) */
+
+/* Import Cinzel untuk title (bold serif klasik) */
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap");
+
+/* Import Lora untuk subtitle/body (serif readable) */
+@import url("https://fonts.googleapis.com/css2?family=Lora:wght@400;500&display=swap");
+
+/* Optional: Custom variables untuk paulus-blue */
+:root {
+  --paulus-blue: #1E40AF;
+}
+
+/* Global fallback fonts */
+h1, h2, h3 {
+  font-family: 'Cinzel', Georgia, serif;
+}
+p, body {
+  font-family: 'Lora', Georgia, serif;
+}
+/* Global: Force Full Height untuk Centering (Override Tailwind Reset) */
+html, body {
+  height: 100vh !important;  /* Fixed viewport height */
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;  /* No horizontal scroll */
+}
+
+#app {
+  height: 100vh;  /* Nuxt root full height */
+  min-height: 100vh;
+}
+
+/* Navbar Fixed Offset (Jika Header nav fixed) */
+header nav {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;  /* Di atas hero z-10 */
+  height: 4rem;  /* 64px = pt-16 match */
+}
+
+/* Hero Parent Full Available Space */
+.hero-parent {
+  padding-top: 4rem;  /* Offset navbar */
+  height: calc(100vh - 4rem);  /* Explicit: Full minus navbar */
+  min-height: calc(100vh - 4rem);
+}
