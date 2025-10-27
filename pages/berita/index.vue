@@ -1,9 +1,9 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
+  <div class="min-h-screen pt-20 bg-gray-50">
     <Breadcrumb title="Berita" />
     <!-- Header Halaman -->
     <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-4">Berita Gereja Paulus Juanda</h1>
+      <h1 class="text-4xl font-cinzel text-[#882f1d] mb-4">Berita Gereja Paulus Juanda</h1>
       <p class="text-lg text-gray-600">Update terbaru tentang kegiatan dan acara gereja kami.</p>
     </div>
 

@@ -29,10 +29,9 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
             <select v-model="faqForm.category" class="w-full border p-2 rounded">
               <option value="">Pilih Kategori</option>
-              <option value="mass">Jadwal Misa</option>
-              <option value="sacraments">Sakramen</option>
-              <option value="parish_info">Informasi Paroki</option>
-              <option value="activities">Kegiatan</option>
+              <option v-for="category in categories" :key="category.id" :value="category.slug">
+                {{ category.name }}
+              </option>
             </select>
           </div>
 
@@ -99,7 +98,7 @@
           <tbody>
             <tr v-for="faq in faqs" :key="faq.id" class="border-t">
               <td class="px-4 py-2 max-w-xs truncate" :title="faq.question">{{ faq.question }}</td>
-              <td class="px-4 py-2">{{ faq.category || '-' }}</td>
+              <td class="px-4 py-2">{{ getCategoryName(faq.category) || '-' }}</td>
               <td class="px-4 py-2">
                 <span
                   :class="faq.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
@@ -122,9 +121,14 @@
 </template>
 
 <script setup>
+definePageMeta({
+  layout: 'admin'
+})
+
 const { makeRequest } = useAdminApi()
 
 const faqs = ref([])
+const categories = ref([])
 const faqForm = ref({
   question: '',
   answer: '',
@@ -137,7 +141,7 @@ const loading = ref(false)
 const message = ref('')
 const error = ref('')
 
-// Load FAQs
+// Load FAQs and Categories
 const loadFaqs = async () => {
   try {
     faqs.value = await makeRequest('/api/admin/chatbot-faqs')
@@ -146,8 +150,17 @@ const loadFaqs = async () => {
   }
 }
 
+const loadCategories = async () => {
+  try {
+    categories.value = await makeRequest('/api/admin/chatbot-faq-categories')
+  } catch (err) {
+    console.error('Failed to load categories', err)
+  }
+}
+
 onMounted(() => {
   loadFaqs()
+  loadCategories()
 })
 
 const saveFaq = async () => {
@@ -212,6 +225,11 @@ const resetForm = () => {
     is_active: true
   }
   keywordsText.value = ''
+}
+
+const getCategoryName = (slug) => {
+  const category = categories.value.find(cat => cat.slug === slug)
+  return category ? category.name : slug
 }
 
 const deleteFaq = async (faq) => {

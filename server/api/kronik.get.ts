@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
 
     let kronikItems: any[] = []
 
-    // Get news with the category
+    // Get news with the category (through relations table)
     if (articleCategory) {
       const newsQuery = `
         SELECT
@@ -30,7 +30,8 @@ export default defineEventHandler(async (event) => {
           '/berita/' || n.slug as link,
           NULL as image
         FROM news n
-        WHERE n.category_id = ? AND n.status = 'published'
+        INNER JOIN news_category_relations ncr ON n.id = ncr.news_id
+        WHERE ncr.category_id = ? AND n.status = 'published'
         ORDER BY n.published_at DESC
       `
       const news = db.prepare(newsQuery).all(articleCategory.id)

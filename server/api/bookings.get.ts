@@ -1,19 +1,13 @@
 import { allQuery } from '../database/db'
-import { requireAuth } from '../utils/auth'
+import { requireAuth, getUserPermissions } from '../utils/auth'
 
 export default defineEventHandler(async (event) => {
   // Require authentication
   const decoded = requireAuth(event)
   const userId = decoded.userId
 
-  // Get user info to check role
-  const user = allQuery('SELECT role FROM users WHERE id = ?', [userId])[0] as any
-  if (!user) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'User not found'
-    })
-  }
+  // Get user permissions
+  const userPermissions = getUserPermissions({ id: userId })
 
   const { start, end, status } = getQuery(event)
 
@@ -57,8 +51,8 @@ export default defineEventHandler(async (event) => {
     query += " AND b.status = 'APPROVED'"
   }
 
-  // If user is not admin, only show their own bookings or all approved
-  if (user.role !== 'admin') {
+  // If user doesn't have manage_bookings permission, only show their own bookings or all approved
+  if (!userPermissions.includes('manage_bookings')) {
     query += " AND (b.user_id = ? OR b.status = 'APPROVED')"
     params.push(userId)
   }

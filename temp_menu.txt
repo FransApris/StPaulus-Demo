@@ -1,0 +1,6 @@
+      documentCategories: true,
+      documents: true,
+      pages: true
+      documentCategories: true,
+      documents: true,
+      pages: true

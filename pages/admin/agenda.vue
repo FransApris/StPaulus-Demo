@@ -295,7 +295,7 @@ const fetchCategories = async () => {
   try {
     const response = await $fetch('/api/admin/agenda/categories', {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
     categories.value = response
@@ -315,7 +315,7 @@ const fetchAgendas = async () => {
 
     const response = await $fetch(`/api/admin/agenda?${params}`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
     agendas.value = response
@@ -336,7 +336,7 @@ const saveAgenda = async () => {
       method,
       body: agendaForm.value,
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
 
@@ -371,7 +371,7 @@ const deleteAgenda = async (id) => {
     await $fetch(`/api/admin/agenda/${id}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
     fetchAgendas()
@@ -436,7 +436,7 @@ const getCategoryClass = (agenda) => {
 
 // Check authentication and fetch data on mount
 onMounted(async () => {
-  const token = localStorage.getItem('admin_token')
+  const token = sessionStorage.getItem('admin_token')
   if (!token) {
     navigateTo('/admin/login')
     return

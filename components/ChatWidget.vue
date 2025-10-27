@@ -3,13 +3,13 @@
     <!-- Chat Button -->
     <button
       @click="toggleChat"
-      class="bg-paulus-blue hover:bg-blue-700 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-105"
+      class="bg-paulus-blue hover:bg-blue-700 text-white rounded-full w-20 h-20 md:w-24 md:h-24 flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-105"
       :class="{ 'rotate-45': isOpen }"
     >
-      <svg v-if="!isOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg v-if="!isOpen" class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
       </svg>
-      <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg v-else class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
       </svg>
     </button>
@@ -74,6 +74,8 @@
 </template>
 
 <script setup>
+import { ref, nextTick, onMounted, onUnmounted } from 'vue'
+
 const isOpen = ref(false)
 const messages = ref([])
 const newMessage = ref('')
@@ -142,14 +144,14 @@ const sendMessage = async () => {
 }
 
 // Close chat when clicking outside (optional enhancement)
-onMounted(() => {
-  const handleClickOutside = (event) => {
-    const chatWidget = event.target.closest('.chat-widget')
-    if (!chatWidget && isOpen.value) {
-      isOpen.value = false
-    }
+const handleClickOutside = (event) => {
+  const chatWidget = event.target.closest('.chat-widget')
+  if (!chatWidget && isOpen.value) {
+    isOpen.value = false
   }
+}
 
+onMounted(() => {
   document.addEventListener('click', handleClickOutside)
 })
 
@@ -159,7 +161,4 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.chat-widget {
-  /* For click outside detection */
-}
 </style>

@@ -3,13 +3,13 @@ import { runQuery } from '../database/db'
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
-    const { name, email, message } = body
+    const { name, email, phone, message } = body
 
     // Validation
-    if (!name || !email || !message) {
+    if (!name || !email || !phone || !message) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Nama, email, dan pesan diperlukan'
+        statusMessage: 'Nama, email, nomor HP, dan pesan diperlukan'
       })
     }
 
@@ -24,8 +24,8 @@ export default defineEventHandler(async (event) => {
 
     // Insert contact message
     const result = runQuery(
-      'INSERT INTO contact_messages (name, email, message, is_read, created_at, updated_at) VALUES (?, ?, ?, FALSE, datetime(\'now\'), datetime(\'now\'))',
-      [name, email, message]
+      'INSERT INTO contact_messages (name, email, phone, message, is_read, created_at, updated_at) VALUES (?, ?, ?, ?, FALSE, datetime(\'now\'), datetime(\'now\'))',
+      [name, email, phone, message]
     )
 
     return {

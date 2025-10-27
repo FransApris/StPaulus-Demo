@@ -24,7 +24,8 @@
                   <p>Ruangan: {{ booking.room_name }}</p>
                   <p>Pemesan: {{ booking.user_name }} ({{ booking.user_category }})</p>
                   <p>Unit: {{ booking.unit_name }}</p>
-                  <p>Waktu: {{ new Date(booking.start_time).toLocaleString() }} - {{ new Date(booking.end_time).toLocaleString() }}</p>
+                  <p>Tanggal: {{ formatBookingDate(booking.start_time) }}</p>
+                  <p>Waktu: {{ formatBookingTime(booking.start_time, booking.end_time) }}</p>
                   <p>Status: <span :class="getStatusClass(booking.status)">{{ booking.status }}</span></p>
                   <p v-if="booking.rejection_reason" class="text-red-600">Alasan: {{ booking.rejection_reason }}</p>
                 </div>
@@ -53,6 +54,10 @@
 </template>
 
 <script setup>
+definePageMeta({
+  layout: 'admin'
+})
+
 const bookings = ref([])
 const filterStatus = ref('PENDING')
 const showRejectModal = ref(false)
@@ -62,7 +67,11 @@ const selectedBooking = ref(null)
 const loadBookings = async () => {
   try {
     const params = filterStatus.value ? `?status=${filterStatus.value}` : ''
-    bookings.value = await $fetch(`/api/admin/bookings${params}`)
+    bookings.value = await $fetch(`/api/admin/bookings${params}`, {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem('admin_token')}`
+      }
+    })
   } catch (err) {
     console.error('Failed to load bookings', err)
   }
@@ -76,11 +85,17 @@ const approveBooking = async (booking) => {
   try {
     await $fetch(`/api/bookings/${booking.id}`, {
       method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem('admin_token')}`
+      },
       body: { status: 'APPROVED' }
     })
     await loadBookings()
+    alert('Pemesanan berhasil disetujui')
   } catch (err) {
-    alert('Gagal menyetujui pemesanan')
+    console.error('Error approving booking:', err)
+    const errorMessage = err.data?.statusMessage || 'Gagal menyetujui pemesanan'
+    alert(`Error: ${errorMessage}`)
   }
 }
 
@@ -98,13 +113,20 @@ const confirmReject = async () => {
   try {
     await $fetch(`/api/bookings/${selectedBooking.value.id}`, {
       method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem('admin_token')}`
+      },
       body: { status: 'REJECTED', rejection_reason: rejectionReason.value }
     })
     showRejectModal.value = false
     selectedBooking.value = null
+    rejectionReason.value = ''
     await loadBookings()
+    alert('Pemesanan berhasil ditolak')
   } catch (err) {
-    alert('Gagal menolak pemesanan')
+    console.error('Error rejecting booking:', err)
+    const errorMessage = err.data?.statusMessage || 'Gagal menolak pemesanan'
+    alert(`Error: ${errorMessage}`)
   }
 }
 
@@ -116,5 +138,24 @@ const getStatusClass = (status) => {
     case 'CANCELLED': return 'text-gray-600'
     default: return 'text-gray-600'
   }
+}
+
+const formatBookingDate = (dateTime) => {
+  const date = new Date(dateTime)
+  return date.toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+}
+
+const formatBookingTime = (startTime, endTime) => {
+  const start = new Date(startTime)
+  const end = new Date(endTime)
+
+  const startTimeStr = start.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+  const endTimeStr = end.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+
+  return `${startTimeStr} - ${endTimeStr}`
 }
 </script>

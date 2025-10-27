@@ -61,7 +61,7 @@
         </form>
 
         <div class="mt-6 text-center text-sm text-gray-600">
-          <p>Default login: admin / admin123</p>
+          <p>Pengelolan Konten Website St. Paulus - Juanda</p>
         </div>
       </div>
     </div>
@@ -82,13 +82,13 @@ const handleLogin = async () => {
   error.value = ''
 
   try {
-    const response = await $fetch('/api/admin/login', {
+    const response = await $fetch('/api/auth/login', {
       method: 'POST',
       body: form.value
     })
 
-    // Store token in localStorage
-    localStorage.setItem('admin_token', response.token)
+    // Store token in sessionStorage (cleared when tab is closed)
+    sessionStorage.setItem('admin_token', response.token)
 
     // Redirect to dashboard
     await navigateTo('/admin/dashboard')
@@ -101,7 +101,7 @@ const handleLogin = async () => {
 
 // Redirect if already logged in
 onMounted(() => {
-  const token = localStorage.getItem('admin_token')
+  const token = sessionStorage.getItem('admin_token')
   if (token) {
     navigateTo('/admin/dashboard')
   }

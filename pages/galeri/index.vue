@@ -40,6 +40,17 @@
               <img :src="album.thumbnail" :alt="album.title" class="w-full h-48 object-cover">
               <div class="p-6">
                 <h3 class="text-2xl font-cinzel text-paulus-blue mb-2">{{ album.title }}</h3>
+                <div v-if="album.tanggal_peristiwa" class="text-sm text-gray-500 mb-1">
+                  📅 {{ formatDate(album.tanggal_peristiwa) }}
+                </div>
+                <div v-if="album.category" class="mb-2">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    :style="{ backgroundColor: album.category.color + '20', color: album.category.color }"
+                  >
+                    {{ album.category.name }}
+                  </span>
+                </div>
                 <p class="text-gray-600 line-clamp-3">{{ album.description }}</p>
               </div>
             </NuxtLink>
@@ -58,13 +69,26 @@ const { data: galleryData, pending, error } = await useAsyncData('gallery-list',
   $fetch('/api/galeri')
 );
 
-// PENTING: Kode ini mengasumsikan API Anda ('/api/galeri') 
+// Fungsi untuk format tanggal
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
+}
+
+// PENTING: Kode ini mengasumsikan API Anda ('/api/galeri')
 // mengembalikan objek dengan array bernama 'albums'.
 // Setiap album di dalamnya harus memiliki properti:
 // - id: untuk link (e.g., 'bksn-biak-2025')
 // - thumbnail: URL gambar sampul
 // - title: Judul album
 // - description: Deskripsi singkat album
+// - tanggal_peristiwa: Tanggal peristiwa (opsional)
+// - category: Objek kategori dengan name dan color (opsional)
 </script>
 
 <style scoped>

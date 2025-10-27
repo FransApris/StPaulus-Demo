@@ -326,7 +326,7 @@ const editor = useEditor({
 })
 
 const handleLogout = () => {
-  localStorage.removeItem('admin_token')
+  sessionStorage.removeItem('admin_token')
   navigateTo('/admin/login')
 }
 
@@ -337,7 +337,7 @@ const fetchNews = async () => {
     const params = filterStatus.value ? `?status=${filterStatus.value}` : ''
     const response = await $fetch(`/api/admin/news${params}`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
     news.value = response
@@ -354,7 +354,7 @@ const fetchCategories = async () => {
   try {
     const response = await $fetch('/api/admin/article-categories', {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
 
@@ -387,7 +387,7 @@ const saveNews = async () => {
     await $fetch(url, {
       method,
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`,
         'Content-Type': 'application/json'
       },
       body: newsForm.value
@@ -428,7 +428,7 @@ const togglePublish = async (newsItem) => {
     await $fetch(`/api/admin/news/${newsItem.id}`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`,
         'Content-Type': 'application/json'
       },
       body: { ...newsItem, status: newStatus }
@@ -452,7 +452,7 @@ const deleteNews = async (newsItem) => {
     await $fetch(`/api/admin/news/${newsItem.id}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
 
@@ -534,7 +534,7 @@ const getStatusText = (status) => {
 
 // Check authentication and fetch data on mount
 onMounted(async () => {
-  const token = localStorage.getItem('admin_token')
+  const token = sessionStorage.getItem('admin_token')
   if (!token) {
     navigateTo('/admin/login')
     return

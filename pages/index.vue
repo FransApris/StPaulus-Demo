@@ -1,13 +1,13 @@
 <template>
   <div class="min-h-screen pt-16">
-    <!-- HeroSection (Unchanged) -->
+    <!-- HeroSection (Dynamic based on active theme) -->
     <HeroSection
       :show-hero="true"
       title="Selamat Datang di Website Gereja Paulus Juanda"
       subtitle="Temukan berita, artikel, galeri kegiatan, dan agenda terbaru kami."
       cta-text="Lihat Jadwal Misa"
       cta-to="/misa"
-      hero-image="/images/gereja-stpaulus-hero.jpg"
+      :hero-image="activeTheme?.image_path || '/images/gereja-stpaulus-hero.jpg'"
     />
 
     <!-- Section 1: Welcome / About Teaser (Unchanged) -->
@@ -145,8 +145,106 @@
       </div>
     </section>
 
-    <!-- Section 5: Artikel Terbaru (Updated to use API) -->
+    <!-- Section 5: Dokumen Paroki -->
     <section class="py-16 bg-white">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-cinzel text-[#882f1d] mb-4">DOKUMEN UNGGULAN</h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">Koleksi dokumen resmi dan informasi penting Gereja St. Paulus Juanda.</p>
+        </div>
+        <div v-if="featuredDocumentsPending" class="text-center text-gray-500">
+          Memuat dokumen unggulan...
+        </div>
+        <div v-else-if="featuredDocumentsError" class="text-center text-red-500">
+          Gagal memuat dokumen unggulan.
+        </div>
+        <div v-else-if="featuredDocuments && featuredDocuments.length > 0" class="grid md:grid-cols-3 gap-8">
+          <div
+            v-for="document in featuredDocuments.slice(0, 3)"
+            :key="document.id"
+            class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+          >
+            <div class="p-6">
+              <!-- Category Badge -->
+              <div class="flex items-center mb-3">
+                <div class="flex-shrink-0 w-4 h-4 rounded mr-2" :style="{ backgroundColor: document.category_color }"></div>
+                <span class="text-sm font-medium text-gray-600">{{ document.category_name }}</span>
+              </div>
+
+              <!-- Title -->
+              <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{{ document.title }}</h3>
+
+              <!-- Description -->
+              <p v-if="document.description" class="text-gray-600 text-sm mb-4 line-clamp-3">
+                {{ document.description }}
+              </p>
+
+              <!-- File Info -->
+              <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                <span>{{ document.original_filename }}</span>
+                <span>{{ formatFileSize(document.file_size) }}</span>
+              </div>
+
+              <!-- Upload Date and Action Buttons Row -->
+              <div class="flex items-center justify-between">
+                <!-- Upload Date -->
+                <div class="text-xs text-gray-400">
+                  Diunggah: {{ formatDate(document.created_at) }}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex space-x-1">
+                  <button
+                    @click="viewDocument(document)"
+                    class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200"
+                    title="Lihat Dokumen"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                  </button>
+                  <button
+                    @click="printDocument(document)"
+                    class="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors duration-200"
+                    title="Cetak Dokumen"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                    </svg>
+                  </button>
+                  <button
+                    @click="downloadDocument(document)"
+                    class="p-2 text-gray-600 hover:text-[#882f1d] hover:bg-red-50 rounded-md transition-colors duration-200"
+                    title="Download Dokumen"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else class="text-center text-gray-500">
+          <svg class="mx-auto h-24 w-24 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada dokumen unggulan</h3>
+          <p class="text-gray-600">Belum ada dokumen yang ditandai sebagai unggulan.</p>
+        </div>
+        <!-- CTA ke Full Dokumen -->
+        <div class="text-center mt-12">
+          <NuxtLink to="/dokumen-paroki" class="bg-[#882f1d] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#a55e1f] transition-colors">
+            Lihat Semua Dokumen
+          </NuxtLink>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Artikel Terbaru (Updated to use API) -->
+    <section class="py-16 bg-gray-50">
       <div class="container mx-auto px-4">
         <div class="text-center mb-12">
           <h2 class="text-3xl font-cinzel text-[#882f1d] mb-4">Artikel & Renungan</h2>
@@ -254,7 +352,7 @@
               </div>
 
               <NuxtLink
-                :to="`/agenda`"
+                :to="`/agenda/${agenda.id}`"
                 class="inline-block text-[#882f1d] font-medium hover:text-[#6b2416] transition-colors"
               >
                 Lihat Detail →
@@ -273,6 +371,74 @@
         <div class="text-center mt-12">
           <NuxtLink to="/agenda" class="bg-[#882f1d] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#a55e1f] transition-colors">
             Lihat Semua Agenda
+          </NuxtLink>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Status Pemesanan Ruangan -->
+    <section class="py-16 bg-white">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-cinzel text-[#882f1d] mb-4">Status Pemesanan Ruangan</h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">Status pemesanan ruangan di Paroki St. Paulus - Juanda.</p>
+        </div>
+        <div v-if="bookingsPending" class="text-center text-gray-500">
+          Memuat status pemesanan...
+        </div>
+        <div v-else-if="bookingsError" class="text-center text-red-500">
+          Gagal memuat status pemesanan.
+        </div>
+        <div v-else-if="publicBookings && publicBookings.length > 0" class="overflow-x-auto">
+          <table class="min-w-full bg-white rounded-lg shadow-md">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal & Waktu</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Acara</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ruangan</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr
+                v-for="booking in publicBookings.slice(0, 10)"
+                :key="booking.id"
+                class="hover:bg-gray-50"
+              >
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ formatDate(booking.event_date) }}</div>
+                  <div class="text-sm text-gray-500">{{ booking.start_time }} - {{ booking.end_time }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">{{ booking.event_name }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ booking.room_name }}</div>
+                  <div class="text-sm text-gray-500">{{ booking.room_location }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span
+                    :style="getBookingStatusStyle(booking.status)"
+                    class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                  >
+                    {{ booking.status }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-else class="text-center text-gray-500">
+          <svg class="mx-auto h-24 w-24 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada pemesanan ruangan</h3>
+          <p class="text-gray-600">Belum ada pemesanan ruangan yang tercatat.</p>
+        </div>
+        <!-- CTA ke Full Bookings -->
+        <div class="text-center mt-12">
+          <NuxtLink to="/booking" class="bg-[#882f1d] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#a55e1f] transition-colors">
+            Pesan Ruangan
           </NuxtLink>
         </div>
       </div>
@@ -301,6 +467,21 @@ const { data: agendaData, pending: agendaPending, error: agendaError } = await u
   $fetch('/api/agenda/upcoming')
 );
 
+// Fetch featured documents data
+const { data: featuredDocumentsData, pending: featuredDocumentsPending, error: featuredDocumentsError } = await useAsyncData('homepage-featured-documents', () =>
+  $fetch('/api/featured-documents'), { server: false }
+);
+
+// Fetch public bookings data
+const { data: bookingsData, pending: bookingsPending, error: bookingsError } = await useAsyncData('homepage-bookings', () =>
+  $fetch('/api/bookings/public-list')
+);
+
+// Fetch active hero theme
+const { data: activeThemeData } = await useAsyncData('active-hero-theme', () =>
+  $fetch('/api/hero-theme/active')
+);
+
 // Get the latest album (first in sorted array)
 const latestAlbum = computed(() => {
   return galleryData.value?.albums?.[0] || null;
@@ -321,6 +502,21 @@ const upcomingAgendas = computed(() => {
   return agendaData.value || [];
 });
 
+// Get featured documents (first 3)
+const featuredDocuments = computed(() => {
+  return featuredDocumentsData.value || [];
+});
+
+// Get public bookings (first 6)
+const publicBookings = computed(() => {
+  return bookingsData.value?.bookings || [];
+});
+
+// Get active hero theme
+const activeTheme = computed(() => {
+  return activeThemeData.value?.data || null;
+});
+
 // Helper functions
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('id-ID', {
@@ -329,6 +525,73 @@ const formatDate = (dateString) => {
     month: 'long',
     day: 'numeric'
   })
+}
+
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+const viewDocument = async (document) => {
+  if (process.client) {
+    try {
+      const response = await fetch(`/api/documents/${document.id}/download`)
+      if (!response.ok) throw new Error('Failed to fetch document')
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      window.open(url, '_blank')
+    } catch (error) {
+      console.error('Failed to view document:', error)
+      alert('Gagal membuka dokumen')
+    }
+  }
+}
+
+const printDocument = async (document) => {
+  if (process.client) {
+    try {
+      const response = await fetch(`/api/documents/${document.id}/download`)
+      if (!response.ok) throw new Error('Failed to fetch document')
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const printWindow = window.open(url, '_blank')
+
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print()
+        }
+      }
+    } catch (error) {
+      console.error('Failed to print document:', error)
+      alert('Gagal mencetak dokumen')
+    }
+  }
+}
+
+const downloadDocument = async (document) => {
+  if (process.client) {
+    try {
+      const response = await fetch(`/api/documents/${document.id}/download`)
+      if (!response.ok) throw new Error('Failed to fetch document')
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', document.original_filename)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+    } catch (error) {
+      console.error('Failed to download document:', error)
+      alert('Gagal mengunduh dokumen')
+    }
+  }
 }
 
 const getCategoryStyle = (agenda) => {
@@ -348,6 +611,35 @@ const getCategoryStyle = (agenda) => {
     backgroundColor: 'rgba(156, 163, 175, 0.1)',
     color: '#6B7280',
     border: '1px solid #D1D5DB'
+  }
+}
+
+const getBookingStatusStyle = (status) => {
+  switch (status) {
+    case 'APPROVED':
+      return {
+        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+        color: '#16A34A',
+        border: '1px solid #16A34A'
+      }
+    case 'PENDING':
+      return {
+        backgroundColor: 'rgba(251, 191, 36, 0.1)',
+        color: '#D97706',
+        border: '1px solid #D97706'
+      }
+    case 'REJECTED':
+      return {
+        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+        color: '#DC2626',
+        border: '1px solid #DC2626'
+      }
+    default:
+      return {
+        backgroundColor: 'rgba(156, 163, 175, 0.1)',
+        color: '#6B7280',
+        border: '1px solid #D1D5DB'
+      }
   }
 }
 </script>

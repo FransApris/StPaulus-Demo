@@ -1,13 +1,13 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
-    <div class="flex flex-col lg:flex-row gap-8">
+  <div class="min-h-screen pt-20 bg-gray-50">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
       <!-- Main Content -->
-      <div class="flex-1">
+      <div class="lg:col-span-9">
         <Breadcrumb title="Artikel" />
 
         <!-- Header Halaman -->
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-4">Artikel Gereja Paulus Juanda</h1>
+          <h1 class="text-4xl font-cinzel text-[#882f1d] mb-4">Artikel Gereja Paulus Juanda</h1>
           <p class="text-lg text-gray-600">Temukan artikel mendalam tentang pengajaran Alkitab, renungan harian, dan inspirasi rohani untuk memperkuat iman Anda.</p>
         </div>
 
@@ -74,7 +74,7 @@
       </div>
 
       <!-- Sidebar -->
-      <div class="lg:w-80">
+      <div class="lg:col-span-3 lg:mt-24">
         <!-- Categories Widget -->
         <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
           <h3 class="text-lg font-bold text-gray-900 mb-4">Kategori Artikel</h3>

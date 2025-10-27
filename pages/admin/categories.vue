@@ -91,7 +91,6 @@
     <div
       v-if="showModal"
       class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
-      @click="closeModal"
     >
       <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white" @click.stop>
         <div class="mt-3">
@@ -193,7 +192,7 @@ const fetchCategories = async () => {
   try {
     const response = await $fetch('/api/admin/agenda/categories', {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
     categories.value = response
@@ -250,7 +249,7 @@ const saveCategory = async () => {
       method,
       body: form.value,
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
 
@@ -275,7 +274,7 @@ const deleteCategory = async (id) => {
     await $fetch(`/api/admin/agenda/categories/${id}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
 
@@ -289,7 +288,7 @@ const deleteCategory = async (id) => {
 
 // Initialize
 onMounted(async () => {
-  const token = localStorage.getItem('admin_token')
+  const token = sessionStorage.getItem('admin_token')
   if (!token) {
     navigateTo('/admin/login')
     return

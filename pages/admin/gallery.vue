@@ -31,15 +31,21 @@
 
     <!-- Album List View -->
     <div v-if="currentView === 'album-list'">
-      <!-- Add Album Button -->
-      <div class="mb-6">
-        <button
-          @click="showAddAlbumModal = true"
-          class="bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded-md text-sm font-medium"
-        >
-          Tambah Album Baru
-        </button>
-      </div>
+    <!-- Add Album Button -->
+    <div class="mb-6 flex justify-between items-center">
+      <button
+        @click="showAddAlbumModal = true"
+        class="bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded-md text-sm font-medium"
+      >
+        Tambah Album Baru
+      </button>
+      <button
+        @click="$router.push('/admin/gallery-categories')"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+      >
+        Kelola Kategori
+      </button>
+    </div>
 
       <!-- Albums Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -240,6 +246,29 @@
               <p class="mt-1 text-sm text-gray-500">Slug akan digunakan sebagai nama folder</p>
             </div>
 
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700">Tanggal Peristiwa</label>
+              <input
+                v-model="albumForm.tanggal_peristiwa"
+                type="date"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500"
+              />
+              <p class="mt-1 text-sm text-gray-500">Opsional: Tanggal peristiwa yang diabadikan</p>
+            </div>
+
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700">Kategori</label>
+              <select
+                v-model="albumForm.category_id"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500"
+              >
+                <option v-for="category in categories" :key="category.id" :value="category.id">
+                  {{ category.nama_kategori }}
+                </option>
+              </select>
+              <p class="mt-1 text-sm text-gray-500">Pilih kategori untuk album ini</p>
+            </div>
+
             <div class="flex justify-end space-x-3">
               <button
                 type="button"
@@ -436,11 +465,14 @@ const showUploadModal = ref(false)
 const editingPhoto = ref(null)
 const saving = ref(false)
 const uploading = ref(false)
+const categories = ref([])
 
 const albumForm = ref({
   title: '',
   description: '',
-  slug: ''
+  slug: '',
+  tanggal_peristiwa: '',
+  category_id: 1
 })
 
 const photoForm = ref({
@@ -458,7 +490,7 @@ const fetchAlbums = async () => {
   try {
     const response = await $fetch('/api/admin/gallery', {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
     albums.value = response.albums
@@ -470,11 +502,26 @@ const fetchAlbums = async () => {
   }
 }
 
+// Fetch categories
+const fetchCategories = async () => {
+  try {
+    const response = await $fetch('/api/admin/gallery-categories', {
+      headers: {
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
+      }
+    })
+    categories.value = response.categories
+  } catch (error) {
+    console.error('Failed to fetch categories:', error)
+    alert('Gagal memuat kategori')
+  }
+}
+
 // Save album
 const saveAlbum = async () => {
   saving.value = true
   try {
-    const token = localStorage.getItem('admin_token')
+    const token = sessionStorage.getItem('admin_token')
     const method = editingAlbum.value ? 'PUT' : 'POST'
     const url = editingAlbum.value ? `/api/admin/gallery/${editingAlbum.value.id}` : '/api/admin/gallery'
 
@@ -504,7 +551,9 @@ const editAlbum = (album) => {
   albumForm.value = {
     title: album.title,
     description: album.description,
-    slug: album.id
+    slug: album.id,
+    tanggal_peristiwa: album.tanggal_peristiwa || '',
+    category_id: album.category_id || 1
   }
 }
 
@@ -515,7 +564,7 @@ const deleteAlbum = async (album) => {
   }
 
   try {
-    const token = localStorage.getItem('admin_token')
+    const token = sessionStorage.getItem('admin_token')
     await $fetch(`/api/admin/gallery/${album.id}`, {
       method: 'DELETE',
       headers: {
@@ -541,7 +590,7 @@ const viewAlbum = async (album) => {
     try {
       const response = await $fetch(`/api/admin/gallery/${album.id}/photos`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
         }
       })
       album.photos = response.photos
@@ -621,7 +670,7 @@ const uploadFiles = async () => {
       await $fetch('/api/admin/gallery/photos', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
         },
         body: formData
       })
@@ -647,12 +696,12 @@ const uploadFiles = async () => {
 
   uploading.value = false
 
-  // Refresh album photos
+    // Refresh album photos
   if (currentAlbum.value) {
     try {
       const response = await $fetch(`/api/admin/gallery/${currentAlbum.value.id}/photos`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
         }
       })
       currentAlbum.value.photos = response.photos
@@ -682,7 +731,7 @@ const savePhotoEdit = async () => {
     await $fetch(`/api/admin/gallery/photos/${editingPhoto.value.id}`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`,
         'Content-Type': 'application/json'
       },
       body: photoForm.value
@@ -719,7 +768,7 @@ const deletePhoto = async (photo) => {
     await $fetch(`/api/admin/gallery/photos/${photo.id}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
 
@@ -756,7 +805,7 @@ const onDrop = async (event, dropIndex) => {
     await $fetch(`/api/admin/gallery/${currentAlbum.value.id}/reorder`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`,
         'Content-Type': 'application/json'
       },
       body: { photoIds }
@@ -778,7 +827,9 @@ const closeAlbumModal = () => {
   albumForm.value = {
     title: '',
     description: '',
-    slug: ''
+    slug: '',
+    tanggal_peristiwa: '',
+    category_id: 1
   }
 }
 
@@ -823,12 +874,12 @@ watch(() => albumForm.value.title, (newTitle) => {
 
 // Check authentication and fetch data on mount
 onMounted(async () => {
-  const token = localStorage.getItem('admin_token')
+  const token = sessionStorage.getItem('admin_token')
   if (!token) {
     navigateTo('/admin/login')
     return
   }
 
-  await fetchAlbums()
+  await Promise.all([fetchAlbums(), fetchCategories()])
 })
 </script>

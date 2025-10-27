@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
       FROM articles a
       LEFT JOIN article_category_relations acr ON a.id = acr.article_id
       LEFT JOIN article_categories ac ON acr.category_id = ac.id
-      WHERE a.id = ? AND a.status = 'published'
+      WHERE a.slug = ? AND a.status = 'published'
       GROUP BY a.id
     `;
 

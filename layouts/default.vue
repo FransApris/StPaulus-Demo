@@ -10,7 +10,8 @@
 
     <!-- Footer: Always Bottom -->
     <footer class="bg-gray-800 text-white p-4 text-center mt-auto">
-      <p>&copy; 2023 Gereja Paulus Juanda. Semua hak cipta dilindungi.</p>
+      <p>&copy; 2023 Gereja St. Paulus - Juanda. Semua hak cipta dilindungi.</p>
+      <p>Dikembangkan & dikelola oleh KOMSOS</p>
     </footer>
 
     <!-- Chat Widget -->

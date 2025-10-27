@@ -1,18 +1,12 @@
 import { runQuery, getQuery } from '../../../database/db'
-import { requireAuth } from '../../../utils/auth'
+import { requireAuth, requirePermission } from '../../../utils/auth'
 
 export default defineEventHandler(async (event) => {
   const decoded = requireAuth(event)
   const userId = decoded.userId
 
-  // Check if user is admin
-  const user = getQuery('SELECT role FROM users WHERE id = ?', [userId]) as any
-  if (user.role !== 'admin') {
-    throw createError({
-      statusCode: 403,
-      statusMessage: 'Akses ditolak'
-    })
-  }
+  // Check permissions using RBAC
+  requirePermission('manage_chatbot_faqs')(event)
 
   const id = getRouterParam(event, 'id')
   if (!id) {

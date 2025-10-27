@@ -270,7 +270,7 @@ const visiblePages = computed(() => {
 })
 
 const handleLogout = () => {
-  localStorage.removeItem('admin_token')
+  sessionStorage.removeItem('admin_token')
   navigateTo('/admin/login')
 }
 
@@ -279,14 +279,24 @@ const fetchStats = async () => {
   try {
     const response = await $fetch('/api/admin/stats', {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
     stats.value = response
   } catch (error) {
     if (error.statusCode === 401) {
-      localStorage.removeItem('admin_token')
+      sessionStorage.removeItem('admin_token')
       navigateTo('/admin/login')
+      return
+    }
+    // If 403 Forbidden, set stats to 0 for restricted users
+    if (error.statusCode === 403) {
+      stats.value = {
+        articles: 0,
+        news: 0,
+        albums: 0,
+        photos: 0
+      }
       return
     }
     console.error('Failed to fetch stats:', error)
@@ -300,13 +310,19 @@ const fetchContent = async () => {
     const [articlesResponse, newsResponse] = await Promise.all([
       $fetch('/api/admin/articles', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
         }
+      }).catch(error => {
+        if (error.statusCode === 403) return [] // Return empty array for forbidden access
+        throw error
       }),
       $fetch('/api/admin/news', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
         }
+      }).catch(error => {
+        if (error.statusCode === 403) return [] // Return empty array for forbidden access
+        throw error
       })
     ])
 
@@ -314,7 +330,7 @@ const fetchContent = async () => {
     news.value = newsResponse
   } catch (error) {
     if (error.statusCode === 401) {
-      localStorage.removeItem('admin_token')
+      sessionStorage.removeItem('admin_token')
       navigateTo('/admin/login')
       return
     }

@@ -22,19 +22,26 @@ export default db
 
 // Helper functions
 export const runQuery = (query: string, params: any[] = []) => {
-  return db.prepare(query).run(params)
+  return db.prepare(query).run(...params)
 }
 
 export const getQuery = (query: string, params: any[] = []) => {
-  return db.prepare(query).get(params)
+  return db.prepare(query).get(...params)
 }
 
 export const allQuery = (query: string, params: any[] = []) => {
-  return db.prepare(query).all(params)
+  return db.prepare(query).all(...params)
 }
 
 // Initialize database schema
 export const initDatabase = () => {
+  // Check if tables already exist
+  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='users'").get()
+  if (tables) {
+    console.log('Database already initialized')
+    return
+  }
+
   const schemaPath = path.join(process.cwd(), 'server/database/schema.sql')
   const schema = fs.readFileSync(schemaPath, 'utf8')
 

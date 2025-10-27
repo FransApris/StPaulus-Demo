@@ -82,6 +82,7 @@
                 </span>
               </div>
               <p class="text-xs text-gray-600 mb-1">{{ message.email }}</p>
+              <p class="text-xs text-gray-600 mb-1">{{ message.phone }}</p>
               <p class="text-sm text-gray-700 line-clamp-2">{{ message.message_preview }}</p>
             </div>
           </div>
@@ -133,6 +134,7 @@
                   <div>
                     <h2 class="text-lg font-semibold text-gray-900">{{ selectedMessage.name }}</h2>
                     <p class="text-sm text-gray-600">{{ selectedMessage.email }}</p>
+                    <p class="text-sm text-gray-600">{{ selectedMessage.phone }}</p>
                   </div>
                 </div>
                 <p class="text-sm text-gray-500">
@@ -224,14 +226,14 @@ const fetchMessages = async (page = 1) => {
   try {
     const response = await $fetch(`/api/admin/contact-messages?page=${page}`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
     messages.value = response.messages
     pagination.value = response.pagination
   } catch (error) {
     if (error.statusCode === 401) {
-      localStorage.removeItem('admin_token')
+      sessionStorage.removeItem('admin_token')
       navigateTo('/admin/login')
       return
     }
@@ -254,7 +256,7 @@ const viewMessage = async (id) => {
   try {
     const message = await $fetch(`/api/admin/contact-messages/${id}`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
     selectedMessage.value = message
@@ -266,7 +268,7 @@ const viewMessage = async (id) => {
     }
   } catch (error) {
     if (error.statusCode === 401) {
-      localStorage.removeItem('admin_token')
+      sessionStorage.removeItem('admin_token')
       navigateTo('/admin/login')
       return
     }
@@ -281,7 +283,7 @@ const deleteMessage = async (id) => {
       await $fetch(`/api/admin/contact-messages/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
         }
       })
       
@@ -294,7 +296,7 @@ const deleteMessage = async (id) => {
       alert('Pesan berhasil dihapus')
     } catch (error) {
       if (error.statusCode === 401) {
-        localStorage.removeItem('admin_token')
+        sessionStorage.removeItem('admin_token')
         navigateTo('/admin/login')
         return
       }

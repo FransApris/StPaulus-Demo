@@ -1,18 +1,26 @@
 import { runQuery, getQuery } from '../../database/db'
-import { requireAuth } from '../../utils/auth'
+import { requireAuth, requirePermission, getUserPermissions } from '../../utils/auth'
 
 export default defineEventHandler(async (event) => {
   const decoded = requireAuth(event)
   const userId = decoded.userId
 
-  // Check if user is admin
-  const user = getQuery('SELECT role FROM users WHERE id = ?', [userId]) as any
-  if (user.role !== 'admin') {
+  // Set auth context for permission checking
+  const user = getQuery('SELECT role_id FROM users WHERE id = ?', [userId])
+  if (!user) {
     throw createError({
-      statusCode: 403,
-      statusMessage: 'Hanya admin yang dapat mengubah status pemesanan'
+      statusCode: 401,
+      statusMessage: 'User not found'
     })
   }
+  const permissions = getUserPermissions(user)
+  event.context.auth = {
+    userId: userId,
+    permissions: permissions
+  }
+
+  // Check permissions using RBAC
+  requirePermission('manage_bookings')(event)
 
   const bookingId = getRouterParam(event, 'id')
   const body = await readBody(event)

@@ -1,4 +1,5 @@
 import { authenticateUser } from '../../utils/auth'
+import { getQuery } from '../../database/db'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -21,8 +22,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Check if user has admin role
-  if (result.user.role !== 'admin') {
+  // Check if user has admin role (RBAC: check if user has role_id assigned)
+  const userDetails = getQuery('SELECT role_id FROM users WHERE id = ?', [result.user.id]) as { role_id?: number } | undefined
+  if (!userDetails || !userDetails.role_id) {
     throw createError({
       statusCode: 403,
       statusMessage: 'Akses ditolak. Hanya admin yang dapat masuk.'

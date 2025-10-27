@@ -22,3 +22,14 @@ logs
 .env
 .env.*
 !.env.example
+
+# Sensitive files
+server/admin_token.txt
+cookies.txt
+
+# Database files (local development only)
+server/database/*.db
+server/database/snapshots/*.db
+
+# Uploads (if not needed in repo, or handle via cloud storage)
+# public/uploads/  # Uncomment if uploads should not be in repo

@@ -1,21 +1,12 @@
-import { runQuery, getQuery } from '../../../database/db'
-import { requireAuth } from '../../../utils/auth'
+import { runQuery } from '../../../database/db'
+import { requirePermission } from '../../../utils/auth'
 
 export default defineEventHandler(async (event) => {
-  const decoded = requireAuth(event)
-  const adminId = decoded.userId
-
-  // Check if user is admin
-  const admin = getQuery('SELECT role FROM users WHERE id = ?', [adminId]) as any
-  if (!admin || admin.role !== 'admin') {
-    throw createError({
-      statusCode: 403,
-      statusMessage: 'Akses ditolak'
-    })
-  }
+  // Check for manage_rooms permission
+  requirePermission('manage_rooms')(event)
 
   const body = await readBody(event)
-  const { name, capacity, location, facilities, photo_url, requires_approval, allowed_categories } = body
+  const { name, capacity, location, facilities, requires_approval, allowed_categories } = body
 
   if (!name || !capacity || !location) {
     throw createError({
@@ -41,9 +32,9 @@ export default defineEventHandler(async (event) => {
 
   // Insert room
   const result = runQuery(`
-    INSERT INTO rooms (name, capacity, location, facilities, photo_url, requires_approval, allowed_categories)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `, [name, capacity, location, facilities || null, photo_url || null, requires_approval ? 1 : 0, allowed_categories || null])
+    INSERT INTO rooms (name, capacity, location, facilities, requires_approval, allowed_categories)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `, [name, capacity, location, facilities || null, requires_approval ? 1 : 0, allowed_categories || null])
 
   return {
     id: result.lastInsertRowid,

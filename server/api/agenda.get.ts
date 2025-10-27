@@ -8,12 +8,12 @@ export default defineEventHandler(async (event) => {
     const month = query?.month as string
     const year = query?.year as string
 
-    // Build query - show all events with JOIN
+    // Build query - show only upcoming events with JOIN
     let sql = `
       SELECT a.*, c.name as category_name, c.color as category_color
       FROM agendas a
       LEFT JOIN agenda_categories c ON a.category_id = c.id
-      WHERE 1=1
+      WHERE a.start_date >= datetime('now')
     `
     let params: any[] = []
 

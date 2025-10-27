@@ -41,7 +41,7 @@ const sampleFaqs = [
 ]
 
 const insertFaq = db.prepare(`
-  INSERT INTO chatbot_faqs (question, answer, category, keywords)
+  INSERT OR IGNORE INTO chatbot_faqs (question, answer, category, keywords)
   VALUES (?, ?, ?, ?)
 `)
 

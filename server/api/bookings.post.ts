@@ -43,10 +43,23 @@ export default defineEventHandler(async (event) => {
   }
 
   // Check user permissions for the room
-  const user = getQuery('SELECT user_category FROM users WHERE id = ?', [userId]) as any
-  if (room.allowed_categories) {
-    const allowedCategories = JSON.parse(room.allowed_categories)
-    if (!allowedCategories.includes(user.user_category)) {
+  const user = getQuery('SELECT user_category, role, role_id FROM users WHERE id = ?', [userId]) as any
+
+  // Admin users (super_admin, admin_komsos, admin_sekretariat) can book any room
+  if (user.role_id || user.role === 'admin' || user.role === 'super_admin' || user.role === 'admin_komsos' || user.role === 'admin_sekretariat') {
+    // Admin can book any room, no restrictions
+  } else {
+    // Regular users must have appropriate user_category
+    if (room.allowed_categories && user.user_category) {
+      const allowedCategories = JSON.parse(room.allowed_categories)
+      if (!allowedCategories.includes(user.user_category)) {
+        throw createError({
+          statusCode: 403,
+          statusMessage: 'Anda tidak memiliki akses ke ruangan ini'
+        })
+      }
+    } else if (room.allowed_categories && !user.user_category) {
+      // User doesn't have user_category but room requires specific categories
       throw createError({
         statusCode: 403,
         statusMessage: 'Anda tidak memiliki akses ke ruangan ini'
@@ -54,17 +67,24 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Check for booking conflicts
+  // Check for booking conflicts on the same date
+  const startDate = new Date(start_time).toISOString().split('T')[0] // Extract date part
   const conflicts = getQuery(`
-    SELECT COUNT(*) as count FROM bookings
+    SELECT COUNT(*) as count,
+           GROUP_CONCAT(
+             'dari ' || strftime('%H:%M', start_time) || ' hingga ' || strftime('%H:%M', end_time)
+           ) as conflicting_times
+    FROM bookings
     WHERE room_id = ? AND status = 'APPROVED'
-    AND ((start_time <= ? AND end_time > ?) OR (start_time < ? AND end_time >= ?))
-  `, [room_id, start_time, end_time, end_time, start_time]) as any
+    AND date(start_time) = ?
+    AND ((start_time < ? AND end_time > ?) OR (start_time < ? AND end_time > ?))
+  `, [room_id, startDate, end_time, start_time, start_time, end_time]) as any
 
   if (conflicts.count > 0) {
+    const conflictingTimes = conflicts.conflicting_times || 'waktu tertentu'
     throw createError({
       statusCode: 409,
-      statusMessage: 'Ruangan sudah dipesan pada waktu tersebut'
+      statusMessage: `Konflik Jadwal: Ruangan ini sudah dipesan ${conflictingTimes}. Mohon pilih waktu lain.`
     })
   }
 

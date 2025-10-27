@@ -1,11 +1,21 @@
 import { allQuery } from '../../database/db'
-import { requireAuth } from '../../utils/auth'
+import { requireAuth, requirePermission } from '../../utils/auth'
 import { readdir, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 
 export default defineEventHandler(async (event) => {
-  // Add authentication check
+  // Check authentication and permissions
   requireAuth(event)
+  // Allow read access for content management permissions
+  const authContext = event.context.auth
+  if (!authContext || !authContext.permissions?.some((perm: string) =>
+    ['manage_articles', 'manage_news', 'manage_gallery', 'manage_agenda', 'manage_users', 'manage_rooms', 'manage_bookings'].includes(perm)
+  )) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Forbidden: Insufficient permissions'
+    })
+  }
 
   try {
     // Get article count from database

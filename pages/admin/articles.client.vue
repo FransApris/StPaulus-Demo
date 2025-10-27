@@ -348,7 +348,7 @@ watch(() => articleForm.value.title, (newTitle) => {
 })
 
 const handleLogout = () => {
-  localStorage.removeItem('admin_token')
+  sessionStorage.removeItem('admin_token')
   navigateTo('/admin/login')
 }
 
@@ -359,7 +359,7 @@ const fetchArticles = async () => {
     const params = filterStatus.value ? `?status=${filterStatus.value}` : ''
     const response = await $fetch(`/api/admin/articles${params}`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
     articles.value = response
@@ -376,7 +376,7 @@ const fetchCategories = async () => {
   try {
     const response = await $fetch('/api/admin/article-categories', {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
 
@@ -409,7 +409,7 @@ const saveArticle = async () => {
     await $fetch(url, {
       method,
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`,
         'Content-Type': 'application/json'
       },
       body: articleForm.value
@@ -439,7 +439,7 @@ const editArticle = (article) => {
     category_ids: article.categories ? article.categories.map(cat => cat.id) : []
   }
   nextTick(() => {
-    editor?.commands.setContent(article.content)
+    editor.value?.commands.setContent(article.content)
   })
 }
 
@@ -450,7 +450,7 @@ const togglePublish = async (article) => {
     await $fetch(`/api/admin/articles/${article.id}`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`,
         'Content-Type': 'application/json'
       },
       body: { ...article, status: newStatus }
@@ -474,7 +474,7 @@ const deleteArticle = async (article) => {
     await $fetch(`/api/admin/articles/${article.id}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
       }
     })
 
@@ -580,7 +580,7 @@ const bulkPublish = async () => {
       await $fetch(`/api/admin/articles/${id}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`,
           'Content-Type': 'application/json'
         },
         body: { status: 'published' }
@@ -607,7 +607,7 @@ const bulkDelete = async () => {
       await $fetch(`/api/admin/articles/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
         }
       })
     }
@@ -622,7 +622,7 @@ const bulkDelete = async () => {
 
 // Check authentication and fetch data on mount
 onMounted(async () => {
-  const token = localStorage.getItem('admin_token')
+  const token = sessionStorage.getItem('admin_token')
   if (!token) {
     navigateTo('/admin/login')
     return

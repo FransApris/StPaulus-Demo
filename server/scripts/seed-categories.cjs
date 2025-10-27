@@ -29,7 +29,7 @@ const categories = [
 ];
 
 const insertCategory = db.prepare(`
-  INSERT INTO article_categories (name, slug, parent_id, description, created_at, updated_at)
+  INSERT OR IGNORE INTO article_categories (name, slug, parent_id, description, created_at, updated_at)
   VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
 `);
 

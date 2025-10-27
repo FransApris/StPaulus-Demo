@@ -1,6 +1,6 @@
 export const useAdminApi = () => {
   const makeRequest = async (url: string, options: any = {}) => {
-    const token = localStorage.getItem('admin_token')
+    const token = sessionStorage.getItem('admin_token')
     if (token) {
       options.headers = {
         ...options.headers,
