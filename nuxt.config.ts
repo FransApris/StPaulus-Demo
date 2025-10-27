@@ -3,7 +3,11 @@ export default defineNuxtConfig({
 
   // Penambahan blok nitro untuk menghilangkan warning
   nitro: {
-    compatibilityDate: '2025-10-04'
+    compatibilityDate: '2025-10-04',
+    // Exclude server-side database files from build
+    externals: {
+      inline: ['better-sqlite3']
+    }
   },
 
   runtimeConfig: {
