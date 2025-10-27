@@ -155,7 +155,6 @@ const formatDate = (dateString) => {
 
   /* Properti standar (non-vendor) untuk kompatibilitas lintas browser */
   line-clamp: 2;
-  display: box; /* Fallback untuk standar, tapi jarang dipakai */
 }
 
 .line-clamp-3 {
@@ -166,6 +165,5 @@ const formatDate = (dateString) => {
 
   /* Properti standar */
   line-clamp: 3;
-  display: box;
 }
 </style>
