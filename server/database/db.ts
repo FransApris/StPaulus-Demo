@@ -5,10 +5,14 @@ import fs from 'fs'
 // Database file path
 const DB_PATH = path.join(process.cwd(), 'server/database/cms.db')
 
-// Ensure database directory exists
+// Ensure database directory exists (skip on Vercel serverless)
 const dbDir = path.dirname(DB_PATH)
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true })
+try {
+  if (!fs.existsSync(dbDir) && !process.env.VERCEL) {
+    fs.mkdirSync(dbDir, { recursive: true })
+  }
+} catch (error) {
+  console.warn('Could not create database directory:', error instanceof Error ? error.message : String(error))
 }
 
 // Initialize database
